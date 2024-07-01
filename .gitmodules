@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2024 Sam Windell
+# SPDX-License-Identifier: CC0-1.0
+
+[submodule "third_party_libs/clap"]
+	path = third_party_libs/clap
+	url = https://github.com/free-audio/clap
+[submodule "third_party_libs/clap-wrapper"]
+	path = third_party_libs/clap-wrapper
+	url = https://github.com/Floe-Synth/clap-wrapper
+[submodule "third_party_libs/vst3/base"]
+	path = third_party_libs/vst3/base
+	url = https://github.com/steinbergmedia/vst3_base
+[submodule "third_party_libs/vst3/pluginterfaces"]
+	path = third_party_libs/vst3/pluginterfaces
+	url = https://github.com/steinbergmedia/vst3_pluginterfaces
+[submodule "third_party_libs/vst3/public.sdk"]
+	path = third_party_libs/vst3/public.sdk
+	url = https://github.com/SamWindell/vst3_public_sdk
+[submodule "third_party_libs/portmidi"]
+	path = third_party_libs/portmidi
+	url = https://github.com/PortMidi/portmidi
+[submodule "third_party_libs/tracy"]
+	path = third_party_libs/tracy
+	url = https://github.com/wolfpld/tracy
+[submodule "third_party_libs/flac"]
+	path = third_party_libs/flac
+	url = https://github.com/xiph/flac
+[submodule "third_party_libs/libbacktrace"]
+	path = third_party_libs/libbacktrace
+	url = https://github.com/ianlancetaylor/libbacktrace
+[submodule "third_party_libs/pugl"]
+	path = third_party_libs/pugl
+	url = https://github.com/lv2/pugl.git
+[submodule "third_party_libs/AudioUnitSDK"]
+	path = third_party_libs/AudioUnitSDK
+	url = https://github.com/apple/AudioUnitSDK

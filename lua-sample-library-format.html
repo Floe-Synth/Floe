@@ -1,0 +1,439 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Lua Libraries - Floe User Manual</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "coal" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><a href="mirage.html">Previously known as Mirage</a></li><li class="chapter-item expanded affix "><li class="part-title">Installation</li><li class="chapter-item expanded "><a href="installation/requirements.html"><strong aria-hidden="true">1.</strong> Requirements</a></li><li class="chapter-item expanded "><a href="installation/installer.html"><strong aria-hidden="true">2.</strong> Installer</a></li><li class="chapter-item expanded "><a href="installation/manual-install.html"><strong aria-hidden="true">3.</strong> Manual Installation</a></li><li class="chapter-item expanded "><a href="installation/installing-libraries.html"><strong aria-hidden="true">4.</strong> Installing Sample Libraries</a></li><li class="chapter-item expanded "><a href="installation/uninstalling.html"><strong aria-hidden="true">5.</strong> Uninstalling</a></li><li class="chapter-item expanded affix "><li class="part-title">Sample Library Development</li><li class="chapter-item expanded "><a href="lua-sample-library-format.html" class="active"><strong aria-hidden="true">6.</strong> Lua Libraries</a></li><li class="chapter-item expanded affix "><li class="spacer"></li><li class="chapter-item expanded affix "><a href="changelog.html">Changelog</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Floe User Manual</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/Floe-Synth/Floe" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!--
+SPDX-FileCopyrightText: 2024 Sam Windell
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<h1 id="lua-sample-library-format"><a class="header" href="#lua-sample-library-format">Lua Sample Library Format</a></h1>
+<pre><code class="language-lua">-- Floe Library configuration script
+-- 
+-- This file is a documented example of how Floe's new library configuration works. 
+-- It's a configuration script written in Lua 5.4. It brings the power of a full 
+-- programming language, meaning you can use features such as variables and functions 
+-- to create a configuration that is easy-to-maintain and experiment with.
+-- 
+-- Floe offers a handlful of functions that the Lua code can use to build a library. 
+-- Part of this will involve specifying audio file paths relative to this Lua script.
+-- 
+-- This format is primarily concerned with mapping audio-files to the keyboard; Floe 
+-- handles more advanced sound shaping by offering a friendly GUI. The GUI also 
+-- normally offers setting loop points, but this can sometimes be configured in the Lua 
+-- instead.
+-- 
+-- Let's define the 3 hierarchical building blocks of a Floe library.
+-- 
+-- Firstly, at the lowest level, are Regions. A Region is an area of the keyboard 
+-- defined by 2 dimensions: a key-range and a velocity-range. A Region has an audio 
+-- file attached to it. When a note is played in Floe that fits within the given 
+-- key-range and velociy-range, the audio file is played (there are various other more 
+-- complicated trigger-criteria that be specified than just key &amp; velocity).
+-- 
+-- Secondly, the next structure up the hierarchy is the Instrument. These are things 
+-- that are picked on the GUI. Instruments contain 1 or more Regions. Instruments 
+-- should be fully playable in themselves. Sometimes an Instrument is multisampled and 
+-- complicated, sometimes it's just a single looped sample that is similar in function 
+-- to an oscillator on a subtractive synth.
+-- 
+-- Finally, there is the top-level structure of this configuration, the Library. A 
+-- library is a collection of Instruments - usually with a theme and an intended 
+-- use-case.
+-- 
+-- Note there there is no 'group' structure as is often found in other sample-mapping 
+-- formats such as SFZ. Instead we can create functions or use loops to apply similar 
+-- configuration to a set of regions. Additionally, Floe offers a helper function 
+-- called floe.apply_prototype(prototype, tbl) which allows new tables to be created 
+-- that are based off an existing table. The first argument is the prototype table, and 
+-- the second argument is another table that is filled with values from the prototype 
+-- if they don't already exist in the second table. The modified second argument is 
+-- returned. This function works in a 'deep' way - meaning that sub-tables are also 
+-- handed in the same way.
+-- 
+-- Example usage of floe.apply_prototype:
+-- 
+--   local round_robin_1 = {
+--     trigger_criteria = {
+--       round_robin_index = 0,
+--     },
+--     options = {
+--       auto_map_key_range_group = "rr1",
+--     },
+--   }
+-- 
+--   -- Here, the table that's passed to add_region is round_robin_1 but with the 
+-- second table laid on top of it
+--   floe.add_region(instrument, floe.apply_prototype(round_robin_1, {
+--     file = {
+--       path = "samples/file_c3.flac",
+--       root_key = 60,
+--     },
+--   }))
+-- 
+--   floe.add_region(instrument, floe.apply_prototype(round_robin_1, {
+--     file = {
+--       path = "samples/file_c#3.flac",
+--       root_key = 61,
+--     },
+--   }))
+-- 
+-- Most of Lua's standard libraries are accessible to this script: table, string, math, 
+-- utf8, package, coroutine. However, some libraries are not available to improve the 
+-- safety of running Lua code from unknown sources. packages.loadlib is also not 
+-- available.
+
+
+-- Creates a new library. There should only be one. Return this at the end of the file.
+local library = floe.new_library({
+    -- The name of the library. [required]
+    name = "Rhythmic Evo",
+
+    -- A few words to describe the library. [required]
+    tagline = "Oscillating audio arabesque",
+
+    -- The URL associated with the library.
+    -- [optional, default: no url]
+    url = "https://example.com/product",
+
+    -- The name of the creator of this library. [required]
+    author = "Example Name",
+
+    -- The minor version of this library - backwards-compatible changes are allowed on 
+    -- a library; this field represents that. Non-backwards-compatibile changes are not 
+    -- allowed: you'd need to create a new library such as: "Strings 2".
+    -- [optional, default: 1]
+    minor_version = 1,
+
+    -- Path relative to this script for the background image. It should be a jpg or 
+    -- png.
+    -- [optional, default: ]
+    background_image_path = "images/background.jpg",
+
+    -- Path relative to this script for the icon image. It should be a square jpg or 
+    -- png.
+    -- [optional, default: ]
+    icon_image_path = "images/icon.png",
+})
+
+-- Creates a new instrument. First argument is a library, second argument is a table of 
+-- config options.
+local instrument = floe.new_instrument(library, {
+    -- The name of the instrument. Must be unique. [required]
+    name = "Glimmering Tones",
+
+    -- Words separated by slashes used to hierarchically categorise the instrument.
+    -- [optional, default: no folders]
+    folders = "Bass/Dark",
+
+    -- A description of the instrument.
+    -- [optional, default: no description]
+    description = "Multi-sampled music box with 4 round robin layers.",
+
+    -- An array of strings to denote properties of the instrument.
+    -- [optional, default: no tags]
+    tags = { "Texture", "Bright", "Airy" },
+
+    -- Path to an audio file relative to this script that should be used as the 
+    -- waveform on Floe's GUI.
+    -- [optional, default: first region path]
+    waveform_audio_path = "samples/file1.flac",
+})
+
+floe.add_region(instrument, {
+    -- The file for this region. [required]
+    file = {
+        -- A path to an audio file, relative to this current lua file. [required]
+        path = "One-shots/Resonating String.flac",
+
+        -- The pitch of the audio file as a number from 0 to 127 (a MIDI note number). 
+        -- On a range from 0 to 127. [required]
+        root_key = 60,
+
+        -- The region of the file that can be looped. It should be an array: 3 integers 
+        -- and 1 boolean: { start, end, crossfade, is_ping_pong boolean }. Note that 
+        -- the end number is not inclusive. The start and end numbers can be negative 
+        -- meaning they index the file from the end rather than the start. For example, 
+        -- -1 == number_frames_in_file, -2 == (number_frames_in_file - 1), etc.
+        -- [optional, default: no loop]
+        loop = { 24, 6600, 100, false },
+    },
+
+    -- How this region should be triggered.
+    -- [optional, default: defaults]
+    trigger_criteria = {
+        -- What event triggers this region. Must be one of: "note-on" or "note-off".
+        -- [optional, default: note-on]
+        trigger_event = "note-on",
+
+        -- The pitch range of the keyboard that this region is mapped to. These should 
+        -- be MIDI note numbers, from 0 to 127. Note that the end number is not 
+        -- inclusive.
+        -- [optional, default: { 60, 64 }]
+        key_range = { 60, 64 },
+
+        -- The velocity range of the keyboard that this region is mapped to. This 
+        -- should be an array of 2 numbers ranging from 0 to 100. The first number 
+        -- represents the start of the velocity range and the second number represents 
+        -- 1-past the end of the range.
+        -- [optional, default: { 0, 100 }]
+        velocity_range = { 0, 100 },
+
+        -- Trigger this region only on this round-robin index. For example, if this 
+        -- index is 0 and there are 2 other groups with round-robin indices of 1 and 2, 
+        -- then this region will trigger on every third press of a key only.
+        -- [optional, default: no round-robin]
+        round_robin_index = 0,
+    },
+
+    -- Additional options for this region.
+    -- [optional, default: defaults]
+    options = {
+        -- The start and end point, from 0 to 100, of the Timbre knob on Floe's GUI 
+        -- that this region should be heard. You should overlay this range with other 
+        -- timbre_crossfade_regions. Floe will create an even crossfade of all 
+        -- overlapping sounds. Note that the end number is not inclusive.
+        -- [optional, default: no timbre-crossfade]
+        timbre_crossfade_region = { 0, 50 },
+
+        -- For every region that matches this group, automatically set the start and 
+        -- end values for each region's key range based on its root key. Only works if 
+        -- all region's velocity range are the same.
+        -- [optional, default: no auto-map]
+        auto_map_key_range_group = "rr1",
+
+        -- If another region is triggered at the same time as this one and is 
+        -- overlapping this, then both regions will play crossfaded together. This 
+        -- smooths the transitions between velocity layers.
+        -- [optional, default: false]
+        feather_overlapping_velocity_regions = true,
+    },
+})
+
+return library
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="installation/uninstalling.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="changelog.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="installation/uninstalling.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="changelog.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

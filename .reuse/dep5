@@ -1,0 +1,20 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Floe
+Upstream-Contact: Sam Windell
+Source: https://github.com/floe-synth/floe
+
+Files: test_files/*
+Copyright: 2024 Sam Windell
+License: GPL-3.0-or-later
+
+Files: third_party_libs/stb/stb_*.h
+Copyright: Copyright (c) 2017 Sean Barrett
+License: Unlicense
+
+Files: third_party_libs/dr_*.h third_party_libs/miniaudio/miniaudio.h
+Copyright: Copyright David Reid
+License: Unlicense
+
+Files: *.lock build_resources/*.lock version.txt
+Copyright: 2024 Sam Windell
+License: CC0-1.0
