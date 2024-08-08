@@ -1,0 +1,8 @@
+# Copyright 2024 Sam Windell
+# SPDX-License-Identifier: CC0-1.0
+
+Diagnostics:
+  UnusedIncludes: Strict
+  Suppress: [ "unused-function" ]
+CompileFlags:
+  CompilationDatabase: build_gen/  # Extra search path for compile_commands.json

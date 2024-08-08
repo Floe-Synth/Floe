@@ -1,0 +1,645 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Floe</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Floe is a free, open-source sample library engine. Available as an audio plugin for Windows and macOS.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="theme/floe-theme.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "coal" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="home.html">Home</a></li><li class="chapter-item expanded affix "><a href="mirage.html">Previously known as Mirage</a></li><li class="chapter-item expanded affix "><li class="part-title">Installation</li><li class="chapter-item expanded "><a href="installation/requirements.html"><strong aria-hidden="true">1.</strong> Requirements</a></li><li class="chapter-item expanded "><a href="installation/installer.html"><strong aria-hidden="true">2.</strong> Installer</a></li><li class="chapter-item expanded "><a href="installation/manual-install.html"><strong aria-hidden="true">3.</strong> Manual Installation</a></li><li class="chapter-item expanded "><a href="installation/installing-libraries.html"><strong aria-hidden="true">4.</strong> Installing Sample Libraries</a></li><li class="chapter-item expanded "><a href="installation/uninstalling.html"><strong aria-hidden="true">5.</strong> Uninstalling</a></li><li class="chapter-item expanded affix "><li class="part-title">Sample Library Development</li><li class="chapter-item expanded "><a href="sample-library-format.html"><strong aria-hidden="true">6.</strong> Floe Sample Libraries</a></li><li class="chapter-item expanded affix "><li class="spacer"></li><li class="chapter-item expanded affix "><a href="changelog.html">Changelog</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Floe</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/Floe-Project/Floe" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!--
+SPDX-FileCopyrightText: 2024 Sam Windell
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<div class="warning">
+IMPORTANT: Floe is heavily under development. This manual is a work-in-progress.
+<p>Some things may be incorrect, missing or broken. We are bit-by-bit filling in the gaps ahead of version 1.0.0.</p>
+</div>
+<style>
+.logo-image {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 10%;
+}
+</style>
+<img class="logo-image" src="https://raw.githubusercontent.com/Floe-Project/Floe-Logos/main/icon.svg" alt="Floe logo">
+<h1 style="text-align:center; font-size: 40px">No-hassle sample library player: free for all</h1>
+<p style="text-align:center; margin-bottom: 40px;">Floe is a free, open-source sample library engine in CLAP, VST3 and AU audio plugin formats. It provides expressive playback and sound-shaping of sample libraries in the [Floe format](./sample-library-format.md).</p>
+<p><img src="https://frozenplain.com/wp-content/uploads/2019/09/wraith-2.jpg" alt="Floe’s GUI" /></p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Floe is a free, open-source sample library engine.</p>
+<p>It loads sample libraries in the <a href="./sample-library-format.html">Floe format</a>: supporting both realistic virtual instruments and sample-based synthesis. Sample libraries are installed separately from Floe.</p>
+<p>Floe is a CLAP, VST3 or AU plugin on <i class="fa fa-windows"></i> Windows and <i class="fa fa-apple"></i> macOS.</p>
+<p>Developed by <a href="https://frozenplain.com">FrozenPlain</a>. Floe’s ancestor, <a href="./mirage.html">Mirage</a>, has been used by thousands of musicians and producers in 13 products.</p>
+<blockquote>
+<h3 id="floes-mission"><a class="header" href="#floes-mission">Floe’s mission</a></h3>
+<ol>
+<li>Make sample libraries more expressive, playable and effective in music production.</li>
+<li>Lengthen the lifespan of sample libraries by providing a open-source platform for them with no lock-in.</li>
+<li>Prioritise helping users make meaningful music; not technical hassle, commercial pressure or unnecessary complexity.</li>
+</ol>
+</blockquote>
+<h3 id="key-features"><a class="header" href="#key-features">Key features</a></h3>
+<h4 id="simple-and-effective"><a class="header" href="#simple-and-effective">Simple and effective</a></h4>
+<ul>
+<li>Three-layer architecture for blending timbres into new sounds</li>
+<li>Sound-shaping parameters: envelopes, filters, LFOs and an effects rack</li>
+<li>Supports realistic multi-sampled instruments: velocity layers, round-robin, crossfade layers <strong>[coming soon]</strong></li>
+<li>Supports sample-based synthesis: using samples like ‘oscillators’ with sound-looping features</li>
+<li>Powerful tag-based browsers for finding new sounds and presets <strong>[coming soon]</strong></li>
+<li>Make samples come alive with MIDI MPE support <strong>[coming soon]</strong></li>
+<li>Combine sounds across all sample libraries</li>
+<li>CPU-efficient</li>
+</ul>
+<h4 id="focused-on-helping-you-make-music"><a class="header" href="#focused-on-helping-you-make-music">Focused on helping you make music</a></h4>
+<ul>
+<li>100% free: no lock-in, no sign-up, no nagging, no features behind a paywall</li>
+<li>‘Organic’ software: made by a passionate developer who cares about making great software and is always open to feedback</li>
+<li><a href="https://github.com/Floe-Project/Floe">Open-source</a>, <a href="https://fsfe.org/freesoftware/freesoftware.en.html">free software</a>. Floe is always yours: the GPL license guarantees anyone can use, modify and share the code</li>
+<li>Floe sample libraries are open packs of FLAC/WAV files: use them in other software too</li>
+<li>Thoughtfully designed; thoroughly documented</li>
+</ul>
+<h4 id="sample-library-development"><a class="header" href="#sample-library-development">Sample library development</a></h4>
+<ul>
+<li>Create your own sample libraries using Lua scripts</li>
+<li>Great developer-experience for creating sample libraries; just write Lua code and Floe instantly applies the changes</li>
+<li>No recreating GUIs: Floe provides a powerful GUI for your sample library (GUI customisation will be added in the future)</li>
+</ul>
+<h4 id="continuously-improving"><a class="header" href="#continuously-improving">Continuously improving</a></h4>
+<ul>
+<li>Regular updates</li>
+<li>Always backwards-compatible</li>
+</ul>
+<h2 id="about-this-website"><a class="header" href="#about-this-website">About this website</a></h2>
+<p>This website contains everything you need to know about Floe. It’s presented in a book-like format, with chapters in the sidebar.</p>
+<p>Latest Floe version: 0.0.1</p>
+<p>If you’re viewing this online, you might find the search feature useful: open it by clicking the magnifying glass icon at the top of the page. Additionally, there is a printer icon in the top right for either printing this book, or saving it to a PDF.</p>
+<div style="break-before: page; page-break-before: always;"></div><!--
+SPDX-FileCopyrightText: 2024 Sam Windell
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<h1 id="previously-known-as-mirage"><a class="header" href="#previously-known-as-mirage">Previously known as Mirage</a></h1>
+<p>Floe is a continuation of FrozenPlain’s Mirage plugin (developed from 2018 to 2023). It adds new features and improvements but is based on the same core architecture. Mirage will no longer be developed. Floe starts from version 1.0 rather than continuing from Mirage’s version number.</p>
+<h3 id="why-the-name-change"><a class="header" href="#why-the-name-change">Why the name change?</a></h3>
+<p>The project has taken a new direction and so we decided to give it a new name.</p>
+<ul>
+<li>Floe is free and open-source, whereas Mirage was closed-source.</li>
+<li>Floe is not directly tied to FrozenPlain. It’s a separate project that’s open to anyone.</li>
+<li>Mirage is already the name of a hardware sampler from the 80s - we wanted to avoid confusion.</li>
+</ul>
+<h3 id="backwards-compatible-with-mirage"><a class="header" href="#backwards-compatible-with-mirage">Backwards-compatible with Mirage</a></h3>
+<p>Floe can load Mirage’s libraries and presets. If you have Mirage installed already, Floe will be able to find the same libraries and presets as Mirage.</p>
+<p>You can leave Mirage installed if you want to keep using it: Floe will not interfere with Mirage’s installation.</p>
+<p>However, Floe is a new plugin with a new name that targets new plugin formats. Your old DAW projects that use Mirage will still need Mirage, Floe can’t replace Mirage in that sense.</p>
+<div style="break-before: page; page-break-before: always;"></div><!--
+SPDX-FileCopyrightText: 2024 Sam Windell
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<h1 id="requirements"><a class="header" href="#requirements">Requirements</a></h1>
+<p>Floe is an audio plugin for Windows and macOS. It’s available in the following audio plugin formats: <a href="https://cleveraudio.org/1-feature-overview/">CLAP</a> (Windows and macOS), VST3 (Windows and macOS) and AU (macOS only).</p>
+<p>There’s no ‘standalone’ version at the moment. And also no Linux version, but it’s planned. Finally, there’s no AAX (Pro Tools) version.</p>
+<h3 id="windows"><a class="header" href="#windows">Windows</a></h3>
+<ul>
+<li>Windows 10 or later</li>
+<li>64-bit computer</li>
+<li>CLAP or VST3 host</li>
+</ul>
+<h3 id="macos"><a class="header" href="#macos">macOS</a></h3>
+<ul>
+<li>macOS 11 (Big Sur) or later</li>
+<li>Apple Silicon or Intel (Floe is a universal binary)</li>
+<li>CLAP, AU (v2) or VST3 host</li>
+</ul>
+<h3 id="plugin-hosts-daws"><a class="header" href="#plugin-hosts-daws">Plugin Hosts (DAWs)</a></h3>
+<p>Examples of CLAP/VST3 hosts on Windows &amp; macOS include: Reaper, Bitwig, Cubase, Ableton Live, Studio One, and countless others.</p>
+<p>Examples of AU hosts on macOS include: Logic Pro, GarageBand, and more.</p>
+<div style="break-before: page; page-break-before: always;"></div><!--
+SPDX-FileCopyrightText: 2024 Sam Windell
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<h1 id="installer"><a class="header" href="#installer">Installer</a></h1>
+<p>The typical way to install or upgrade Floe is to use the installer.</p>
+<ol>
+<li>Unzip the installer file. This is normally just a matter of double-clicking the file.</li>
+<li>Close your DAW.</li>
+<li>Run the installer program.</li>
+<li>Follow the instructions, including choosing the plugin formats you want to install.</li>
+<li>Done. Floe will be available to your DAW - but you might yet need to <a href="installation/installing-libraries.html">install sample libraries</a>.</li>
+</ol>
+<p>Floe is backwards-compatible. This means that you can install a new version of Floe over an old version. The installer does this automatically.</p>
+<h3 id="the-old-mirage-installer"><a class="header" href="#the-old-mirage-installer">The old Mirage installer</a></h3>
+<p>Previously, when Floe was known as Mirage, the installer would also install sample libraries. This is no longer the case. For Floe, sample libraries have a separate installation process.</p>
+<p>Additionally, the installer used to require an internet connection and an account or download-ticket. For Floe, the installer is just a simple offline program with no credentials required.</p>
+<div style="break-before: page; page-break-before: always;"></div><!--
+SPDX-FileCopyrightText: 2024 Sam Windell
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<h1 id="manual-installation"><a class="header" href="#manual-installation">Manual Installation</a></h1>
+<p>Normally you’ll want to use the installer, but there could be some cases where you’d prefer to install Floe manually. To allow for this, we provide a zip file that contains Floe’s plugin files.</p>
+<p>Be careful with manual installation: things can get complicated if you have audio plugins installed to multiple places on your computer. If you’re not sure, use the installer instead.</p>
+<p>You can copy these files to wherever your DAW looks for plugins. You can overwrite any old existing Floe installation because Floe is backwards-compatible. Here are the typical installation locations:</p>
+<h3 id="windows-1"><a class="header" href="#windows-1">Windows:</a></h3>
+<ul>
+<li>CLAP (<em>Floe.clap</em>): <code>C:\Program Files\Common Files\CLAP</code></li>
+<li>VST3 (<em>Floe.vst3</em>): <code>C:\Program Files\Common Files\VST3</code></li>
+</ul>
+<h3 id="macos-1"><a class="header" href="#macos-1">macOS:</a></h3>
+<ul>
+<li>CLAP (<em>Floe.clap</em>): <code>/Library/Audio/Plug-Ins/CLAP</code></li>
+<li>VST3 (<em>Floe.vst3</em>): <code>/Library/Audio/Plug-Ins/VST3</code></li>
+<li>AU (<em>Floe.component</em>): <code>/Library/Audio/Plug-Ins/Components</code></li>
+</ul>
+<p>Next, you might need to <a href="installation/installing-libraries.html">install sample libraries</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><!--
+SPDX-FileCopyrightText: 2024 Sam Windell
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<h1 id="installing-sample-libraries"><a class="header" href="#installing-sample-libraries">Installing sample libraries</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><!--
+SPDX-FileCopyrightText: 2024 Sam Windell
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<h1 id="uninstalling"><a class="header" href="#uninstalling">Uninstalling</a></h1>
+<p>Floe doesn’t yet have an uninstaller program. But you can manually uninstall it by deleting Floe’s files.</p>
+<p>Firstly, you will want to delete Floe’s libraries and presets. The easiest way to do this is as follows:</p>
+<ul>
+<li>Open Floe</li>
+<li>Click on the cog icon <i class="fa fa-cog"></i> at the top.</li>
+<li>For each of the paths click the open folder icon <i class="fa fa-external-link-square"></i>. This will open the folder in your file manager.</li>
+<li>Delete the folder that opens.</li>
+<li>Repeat this for each path.</li>
+</ul>
+<p>Next, you can delete Floe’s settings file.</p>
+<div style="break-before: page; page-break-before: always;"></div><!--
+SPDX-FileCopyrightText: 2024 Sam Windell
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<h1 id="floe-library-format"><a class="header" href="#floe-library-format">Floe Library Format</a></h1>
+<h2 id="overview-1"><a class="header" href="#overview-1">Overview</a></h2>
+<p>Floe sample libraries are plain, open folders of audio files (FLAC or WAV). They are accompanied by a <code>floe.lua</code> file that describes how the samples are mapped and configured.</p>
+<p>It is a new format, along the same lines as SFZ or DecentSampler but focusing on ease-of-use and extensibility, and bringing the power of a full programming language to ease developing complicated library configurations.</p>
+<h2 id="developer-documentation"><a class="header" href="#developer-documentation">Developer documentation</a></h2>
+<p>Sample libraries are configured using a file written in the Lua programming language<sup class="footnote-reference"><a href="#MDATA">1</a></sup> (version 5.4).</p>
+<p>Let’s start with a simple example of one of these <code>floe.lua</code> files:</p>
+<pre><code class="language-lua">local library = floe.new_library({
+    name = "Iron Vibrations",
+    tagline = "Organic sounds from resonating metal objects",
+    url = "https://example.com/iron-vibrations",
+    author = "Found-sound Labs",
+    minor_version = 1,
+    background_image_path = "images/background.jpg",
+    icon_image_path = "images/icon.png",
+})
+
+local instrument = floe.new_instrument(library, {
+    name = "Metal Fence Strike",
+    folders = "Fences/Steel",
+    description = "Tonal pluck metallic pluck made from striking a steel fence.",
+    tags = { "Pluck", "Metallic", "Organic" },
+    waveform_audio_path = "samples/file1.flac",
+})
+
+floe.add_region(instrument, {
+    file = {
+        path = "One-shots/Resonating String.flac",
+        root_key = 60,
+        loop = { 24, 6600, 100, false },
+    },
+    trigger_criteria = {
+        trigger_event = "note-on",
+        key_range = { 60, 64 },
+        velocity_range = { 0, 100 },
+        round_robin_index = 0,
+    },
+    options = {
+        timbre_crossfade_region = { 0, 50 },
+        auto_map_key_range_group = "group1",
+        feather_overlapping_velocity_regions = false,
+    },
+})
+
+floe.add_ir(library, {
+    name = "Cathedral",
+    path = "irs/cathedral.flac",
+})
+
+return library
+</code></pre>
+<p>It’s a simple format, but when needed, you have the power of a full programming language (variables, arrays, loops, functions, etc.) to easily create more complicated configurations.</p>
+<p>Floe automatically scans for Lua files in its sample library folders (these are configurable in the settings). It looks for files called <code>floe.lua</code>, or files ending with <code>.floe.lua</code>; for example, <code>woodwind-textures.floe.lua</code>. Floe automatically detects when files are added, removed or changed, and will immediately apply the changes.</p>
+<p>In a <code>floe.lua</code> file, you use a set of functions that Floe provides (<code>floe.&lt;function_name&gt;()</code>) to create a library, instruments, regions, and impulse responses. At the end of your <code>floe.lua</code> file, you return the library object.</p>
+<p>Note this file is only concerned with mapping and configuring audio-files (unlike <a href="https://en.wikipedia.org/wiki/SFZ_(file_format)">SFZ</a>, for example). Sound shaping is provided by Floe’s GUI.</p>
+<p>Note there there is no ‘group’ structure, as is often found in other sample-mapping formats such as SFZ. Instead, we can create functions or use loops to apply similar configuration to a set of regions. Additionally, Floe offers a support function called floe.extend_table(base_table, table) which allows new tables to be created that are based off an existing table.</p>
+<p>Additional, a <code>floe.lua</code> file has access to some of Lua’s standard libraries: <code>math</code>, <code>string</code>, <code>table</code>, <code>utf8</code>. The other standard libraries are not accessible to Lua - including the <code>require</code> function.</p>
+<h2 id="core-functions"><a class="header" href="#core-functions">Core Functions</a></h2>
+<h3 id="floenew_library"><a class="header" href="#floenew_library"><code>floe.new_library</code></a></h3>
+<p>Creates a new library. It takes one parameter: a table of configuration and returns a new library object. You should only call this once.</p>
+<pre><code class="language-lua">local library = floe.new_library({
+    -- The name of the library. [required]
+    name = "Iron Vibrations",
+
+    -- A few words to describe the library. [required]
+    tagline = "Organic sounds from resonating metal objects",
+
+    -- The URL associated with the library.
+    -- [optional, default: no url]
+    url = "https://example.com/iron-vibrations",
+
+    -- The name of the creator of this library. [required]
+    author = "Found-sound Labs",
+
+    -- The minor version of this library - backwards-compatible changes are 
+    -- allowed on a library; this field represents that. Non-backwards-compatibile 
+    -- changes are not allowed: you'd need to create a new library such as: 
+    -- "Strings 2".
+    -- [optional, default: 1]
+    minor_version = 1,
+
+    -- Path relative to this script for the background image. It should be a jpg 
+    -- or png.
+    -- [optional, default: ]
+    background_image_path = "images/background.jpg",
+
+    -- Path relative to this script for the icon image. It should be a square jpg 
+    -- or png.
+    -- [optional, default: ]
+    icon_image_path = "images/icon.png",
+})
+</code></pre>
+<p>The library is the top-level object. It contains all the instruments, regions, and impulse responses.</p>
+<h3 id="floenew_instrument"><a class="header" href="#floenew_instrument"><code>floe.new_instrument</code></a></h3>
+<p>Creates a new instrument on the library. It takes 2 parameters: the library object and a table of configuration. It returns a new instrument object. You can call this function multiple times to create multiple instruments.</p>
+<pre><code class="language-lua">local instrument = floe.new_instrument(library, {
+    -- The name of the instrument. Must be unique. [required]
+    name = "Metal Fence Strike",
+
+    -- Words separated by slashes used to hierarchically categorise the 
+    -- instrument.
+    -- [optional, default: no folders]
+    folders = "Fences/Steel",
+
+    -- A description of the instrument.
+    -- [optional, default: no description]
+    description = "Tonal pluck metallic pluck made from striking a steel fence.",
+
+    -- An array of strings to denote properties of the instrument.
+    -- [optional, default: no tags]
+    tags = { "Pluck", "Metallic", "Organic" },
+
+    -- Path to an audio file relative to this script that should be used as the 
+    -- waveform on Floe's GUI.
+    -- [optional, default: first region path]
+    waveform_audio_path = "samples/file1.flac",
+})
+</code></pre>
+<p>An instrument is like a musical instrument. It is a sound-producing entity that consists of one or more samples (samples are specified in regions). Each library can have multiple instruments.</p>
+<h3 id="floeadd_region"><a class="header" href="#floeadd_region"><code>floe.add_region</code></a></h3>
+<p>Adds a region to an instrument. It takes 2 parameters: the instrument object and a table of configuration. You can call this function multiple times to create multiple regions. Doesn’t return anything.</p>
+<pre><code class="language-lua">floe.add_region(instrument, {
+    -- The file for this region. [required]
+    file = {
+        -- A path to an audio file, relative to this current lua file. [required]
+        path = "One-shots/Resonating String.flac",
+
+        -- The pitch of the audio file as a number from 0 to 127 (a MIDI note 
+        -- number). On a range from 0 to 127. [required]
+        root_key = 60,
+
+        -- The region of the file that can be looped. It should be an array: 3 
+        -- integers and 1 boolean: { start, end, crossfade, is_ping_pong boolean 
+        -- }. Note that the end number is not inclusive. The start and end numbers 
+        -- can be negative meaning they index the file from the end rather than 
+        -- the start. For example, -1 == number_frames_in_file, -2 == 
+        -- (number_frames_in_file - 1), etc.
+        -- [optional, default: no loop]
+        loop = { 24, 6600, 100, false },
+    },
+
+    -- How this region should be triggered.
+    -- [optional, default: defaults]
+    trigger_criteria = {
+        -- What event triggers this region. Must be one of: "note-on" or 
+        -- "note-off".
+        -- [optional, default: note-on]
+        trigger_event = "note-on",
+
+        -- The pitch range of the keyboard that this region is mapped to. These 
+        -- should be MIDI note numbers, from 0 to 127. Note that the end number is 
+        -- not inclusive.
+        -- [optional, default: { 60, 64 }]
+        key_range = { 60, 64 },
+
+        -- The velocity range of the keyboard that this region is mapped to. This 
+        -- should be an array of 2 numbers ranging from 0 to 100. The first number 
+        -- represents the start of the velocity range and the second number 
+        -- represents 1-past the end of the range.
+        -- [optional, default: { 0, 100 }]
+        velocity_range = { 0, 100 },
+
+        -- Trigger this region only on this round-robin index. For example, if 
+        -- this index is 0 and there are 2 other groups with round-robin indices 
+        -- of 1 and 2, then this region will trigger on every third press of a key 
+        -- only.
+        -- [optional, default: no round-robin]
+        round_robin_index = 0,
+    },
+
+    -- Additional options for this region.
+    -- [optional, default: defaults]
+    options = {
+        -- The start and end point, from 0 to 100, of the Timbre knob on Floe's 
+        -- GUI that this region should be heard. You should overlay this range 
+        -- with other timbre_crossfade_regions. Floe will create an even crossfade 
+        -- of all overlapping sounds. Note that the end number is not inclusive.
+        -- [optional, default: no timbre-crossfade]
+        timbre_crossfade_region = { 0, 50 },
+
+        -- For every region that matches this group, automatically set the start 
+        -- and end values for each region's key range based on its root key. Only 
+        -- works if all region's velocity range are the same.
+        -- [optional, default: no auto-map]
+        auto_map_key_range_group = "group1",
+
+        -- If another region is triggered at the same time as this one and is 
+        -- overlapping this, then both regions will play crossfaded together. This 
+        -- smooths the transitions between velocity layers.
+        -- [optional, default: false]
+        feather_overlapping_velocity_regions = false,
+    },
+})
+</code></pre>
+<p>A region is a part of an instrument. It defines an audio file and the conditions under which it will be played. For example, you might have a region that plays the audio file <code>Piano_C3.flac</code> when the note C3 is played. Each instrument must have one or more regions.</p>
+<h3 id="floeadd_ir"><a class="header" href="#floeadd_ir"><code>floe.add_ir</code></a></h3>
+<p>Adds an reverb impulse response to the library. It takes 2 parameters: the library object and a table of configuration. You can call this function multiple times to create multiple impulse responses. Doesn’t return anything.</p>
+<pre><code class="language-lua">floe.add_ir(library, {
+    -- The name of the IR. Must be unique. [required]
+    name = "Cathedral",
+
+    -- File path to the impulse response file, relative to this script. [required]
+    path = "irs/cathedral.flac",
+})
+</code></pre>
+<h2 id="support-functions"><a class="header" href="#support-functions">Support Functions</a></h2>
+<h3 id="floeextend_table"><a class="header" href="#floeextend_table"><code>floe.extend_table</code></a></h3>
+<p>Extends a table with another table, including all sub-tables. It takes 2 parameters: the base table and the table to extend it with. The base table is not modified. The extension table is modified and returned. It has all the keys of the base table plus all the keys of the extended table. If a key exists in both tables, the value from the extension table is used.</p>
+<pre><code class="language-lua">
+local group1 = {
+    trigger_criteria = {
+        trigger_event = "note-on",
+        velocity_range = { 0, 100 },
+    },
+    options = {
+        auto_map_key_range_group = "group1",
+        feather_overlapping_velocity_regions = false,
+    },
+}
+
+floe.add_region(instrument, floe.extend_table(group1, {
+    file = {
+        path = "One-shots/Resonating String 2.flac",
+        root_key = 65,
+    },
+}))
+
+floe.add_region(instrument, floe.extend_table(group1, {
+    file = {
+        path = "One-shots/Resonating String 3.flac",
+        root_key = 68,
+    },
+}))
+</code></pre>
+<div class="footnote-definition" id="MDATA"><sup class="footnote-definition-label">1</sup>
+<p>Floe also supports libraries in the MDATA format, but this is only for backwards compatibility with <a href="./mirage.html">Mirage</a>.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><!--
+SPDX-FileCopyrightText: 2018-2024 Sam Windell
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<!--
+SPDX-FileCopyrightText: 2018-2024 Sam Windell
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<h1 id="changelog"><a class="header" href="#changelog">Changelog</a></h1>
+<h2 id="001"><a class="header" href="#001">0.0.1</a></h2>
+<ul>
+<li>Initial version</li>
+</ul>
+<h2 id="mirage"><a class="header" href="#mirage">Mirage</a></h2>
+<p>Prior to 0.0.1, Floe was known as Mirage. The last Mirage version was 2.0.5.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

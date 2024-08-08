@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2024 Sam Windell
+# SPDX-License-Identifier: CC0-1.0
+
+*.DS_Store
+nvim-project.ini
+.zig-cache/
+build_gen/
+docs/book/
+zig-out/
+build_resources/external/
+.env

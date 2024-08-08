@@ -1,0 +1,62 @@
+# SPDX-FileCopyrightText: 2024 Sam Windell
+# SPDX-License-Identifier: CC0-1.0
+
+# We skip these tests for a reason:
+# - misc-const-correctness: it doesn't work very well. It misses lots and if you use --fix, it makes some things const when they shouldn't be. Seems like it trips up most with clang vector extensions.
+# - clang-analyzer-core.UndefinedBinaryOperatorResult: it seems it doesn't work very well with GNU statement expressions (which we use a lot). I think it's generating false positives when there is a return statement in the statement expression - at this point it seems to think that destructors are being called when they are not.
+#
+# Some other things to note:
+# - The clang-analyzer checks are slow. They relate to the Clang Static Analyzer, which is a somewhat separate project to clang-tidy. The documentation is here: https://clang.llvm.org/docs/analyzer/checkers.html
+
+---
+Checks: '-*,
+  bugprone-integer-division,
+  bugprone-signal-handler,
+  bugprone-undefined-memory-manipulation,
+  clang-analyzer-core.BitwiseShift
+  clang-analyzer-core.CallAndMessage
+  clang-analyzer-core.DivideZero
+  clang-analyzer-cplusplus.NewDelete
+  clang-analyzer-cplusplus.NewDeleteLeaks
+  clang-analyzer-deadcode.DeadStores
+  clang-analyzer-optin.cplusplus.UninitializedObject
+  clang-analyzer-optin.cplusplus.VirtualCall
+  misc-unused-using-decls,
+  modernize-use-auto,
+  modernize-use-nullptr,
+  modernize-use-using,
+  readability-convert-member-functions-to-static,
+  readability-identifier-naming,
+  readability-isolate-declaration,
+  readability-math-missing-parentheses,
+  readability-redundant-casting,
+  readability-redundant-inline-specifier,
+  cppcoreguidelines-interfaces-global-init,
+  bugprone-dynamic-static-initializers,
+  concurrency-mt-unsafe,
+'
+
+# NOTE: bit of a hack - it requires that this folder is called floe
+HeaderFilterRegex: '.*floe/src.*' # only check our code
+WarningsAsErrors: '*'
+
+CheckOptions:
+  - { key: readability-identifier-naming.NamespaceCase,            value: lower_case }
+  - { key: readability-identifier-naming.ClassCase,                value: CamelCase  }
+  - { key: readability-identifier-naming.StructCase,               value: CamelCase  }
+  - { key: readability-identifier-naming.MemberCase,               value: lower_case }
+  - { key: readability-identifier-naming.PrivateMemberPrefix,      value: m_         }
+  - { key: readability-identifier-naming.FunctionCase,             value: CamelCase }
+  - { key: readability-identifier-naming.FunctionIgnoredRegexp,    value: '^begin$|^end$|^__ubsan.*$' }
+  - { key: readability-identifier-naming.MethodCase,               value: CamelCase }
+  - { key: readability-identifier-naming.MethodIgnoredRegexp,      value: '^begin$|^end$|^__ubsan.*$' }
+  - { key: readability-identifier-naming.VariableCase,             value: lower_case }
+  - { key: readability-identifier-naming.VariableIgnoredRegexp,    value: '^__ubsan.*$' }
+  - { key: readability-identifier-naming.ConstexprVariablePrefix,  value: k_ }
+  - { key: readability-identifier-naming.EnumCase,                 value: CamelCase }
+  - { key: readability-identifier-naming.EnumConstantCase,         value: CamelCase }
+  - { key: readability-identifier-naming.TypeAliasCase,            value: CamelCase }
+  - { key: readability-identifier-naming.ConceptCase,              value: CamelCase }
+  - { key: readability-identifier-naming.TypeAliasIgnoredRegexp,   value: '^[a-z][0-9]+.*$|^[a-z]size$|^uintptr$' }
+  - { key: modernize-use-auto.MinTypeNameLength,                   value: 0 }
+

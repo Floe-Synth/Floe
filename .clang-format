@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2024 Sam Windell
+# SPDX-License-Identifier: CC0-1.0
+
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: Consecutive
+AlignOperands: true
+AlignTrailingComments: false
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: true
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBraces: Attach
+BreakConstructorInitializersBeforeComma: true
+BreakStringLiterals: false
+ColumnLimit: 110
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+EmptyLineBeforeAccessModifier: LogicalBlock
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:    '(<.*>)'
+    Priority: 1
+  - Regex:    '^(<|")(foundation|utils|os|tests)/'
+    Priority: 2
+  - Regex:    '^(<|")(plugin)/'
+    Priority: 3
+  - Regex:    '.*'
+    Priority: 4
+IndentCaseLabels: true
+IndentPPDirectives: None
+IndentRequiresClause: false
+IndentWidth: 4
+QualifierAlignment: Right
+PackConstructorInitializers: CurrentLine
+PointerAlignment: Left
+RemoveBracesLLVM: true
+RemoveParentheses: MultipleParentheses
+RequiresClausePosition: WithPreceding
+SeparateDefinitionBlocks: Leave
+SortIncludes: true
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: false
+SpaceBeforeCpp11BracedList: true
+SpacesInParentheses: false
+TabWidth: 4
+UseTab: Never

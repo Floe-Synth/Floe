@@ -1,0 +1,144 @@
+# Copyright 2024 Sam Windell
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: ubuntu-latest # NOTE: we don't actually use Windows
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1.1.0
+      - uses: Hanaasagi/zig-action-cache@master
+        with:
+          cache-directories: |
+            build_gen
+
+      - run: |
+          just fetch-core-library
+          # NOTE: the logos probably have copyright so this should only be done if you have permission
+          just fetch-logos 
+          just build-release windows
+
+      - run: just windows-prepare-release
+        env:
+          WINDOWS_CODESIGN_CERT_PFX: ${{ secrets.WINDOWS_CODESIGN_CERT_PFX }}
+          WINDOWS_CODESIGN_CERT_PFX_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_CERT_PFX_PASSWORD }}
+
+      - name: 'get release dir from just'
+        run: |
+          export RELEASE_DIR=$(just --evaluate release_files_dir)
+          echo "RELEASE_DIR=${RELEASE_DIR}" >> $GITHUB_ENV
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: final-windows
+          if-no-files-found: error
+          path: ${{ env.RELEASE_DIR }}
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1.1.0
+      - uses: Hanaasagi/zig-action-cache@master
+        with:
+          cache-directories: |
+            build_gen
+
+      - run: |
+          just fetch-core-library
+          just build-release mac_ub
+
+      - uses: apple-actions/import-codesign-certs@v3
+        with: 
+          p12-file-base64: ${{ secrets.MACOS_DEV_CERTS_P12 }}
+          p12-password: ${{ secrets.MACOS_DEV_CERTS_P12_PASSWORD }}
+
+      - run: just macos-prepare-release
+        env:
+          MACOS_DEV_ID_INSTALLER_NAME: ${{ secrets.MACOS_DEV_ID_INSTALLER_NAME }}
+          MACOS_DEV_ID_APP_NAME: ${{ secrets.MACOS_DEV_ID_APP_NAME }}
+          MACOS_NOTARIZATION_USERNAME: ${{ secrets.MACOS_NOTARIZATION_USERNAME }}
+          MACOS_NOTARIZATION_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
+          MACOS_TEAM_ID: ${{ secrets.MACOS_TEAM_ID }}
+
+      - name: 'get release dir from just'
+        run: |
+          export RELEASE_DIR=$(just --evaluate release_files_dir)
+          echo "RELEASE_DIR=${RELEASE_DIR}" >> $GITHUB_ENV
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: final-macos
+          if-no-files-found: error
+          path: ${{ env.RELEASE_DIR }}
+
+  deploy:
+    needs: [build-macos, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RELEASE_ARTIFACTS_FOLDER: release_artifacts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: version.txt
+
+      - uses: taiki-e/install-action@just
+
+      - name: 'Set Env'
+        run: |
+          export VERSION=$(cat version.txt)
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          just echo-latest-changes > latest_changes.md
+
+          mkdir -p "$RELEASE_ARTIFACTS_FOLDER"
+          cd "$RELEASE_ARTIFACTS_FOLDER"
+          wget "https://github.com/Floe-Project/Core-Library/archive/refs/heads/main.zip"
+          unzip "main.zip"
+          rm "main.zip"
+          mv "Core-Library-main" "Core"
+          zip -r "Floe-Core-Library.zip" "Core"
+          rm -rf "Core"
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: final-*
+          path: ${{ env.RELEASE_ARTIFACTS_FOLDER }}
+          merge-multiple: true
+
+      - uses: ncipollo/release-action@v1
+        with:
+          artifactErrorsFailBuild: true
+          artifacts: "${{ env.RELEASE_ARTIFACTS_FOLDER }}/*"
+          name: Release v${{ env.VERSION }}
+          tag: v${{ env.VERSION }}
+          draft: true
+          bodyFile: latest_changes.md
+
+      - if: '!cancelled()'
+        run: |
+          icon=""
+          if [ "${{ job.status }}" == "success" ]; then
+            icon="✅"
+          else
+            icon="❌"
+          fi
+          status="$icon Floe release v${{ env.VERSION }}: ${{ job.status }}"
+          curl -d "$status" "ntfy.sh/${{ secrets.NTFY_RELEASE_URL }}"
+

@@ -1,0 +1,214 @@
+# Copyright 2024 Sam Windell
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  mac-compile-and-test:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1.1.0
+      - uses: Hanaasagi/zig-action-cache@master
+        with:
+          cache-directories: |
+            build_gen
+
+      - run: just build mac_ub
+      - run: just test-ci
+
+      - name: Upload logs
+        if: '!cancelled()'
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-macos
+          if-no-files-found: ignore
+          path: /Users/runner/Library/Logs/Floe/floe.log
+
+  linux-compile-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1.1.0
+      - uses: Hanaasagi/zig-action-cache@master
+        with:
+          cache-directories: |
+            build_gen
+
+      - if: '!cancelled()'
+        run: just build native
+
+      - if: '!cancelled()'
+        run: just build windows
+
+      - if: '!cancelled()'
+        run: just build mac_ub
+
+      - if: '!cancelled()'
+        run: just test-ci
+
+      - if: '!cancelled()'
+        name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: build_gen/coverage-out/tests
+          verbose: true
+          fail_ci_if_error: true
+
+      # IMPORTANT(upload-artifact): 
+      #  1. If multiple paths are provided as input, the least common ancestor of all the search paths will be used as the 
+      #     root directory of the artifact. 
+      #  2. All file permissions are removed when uploading.
+
+      - name: Upload Windows binaries
+        if: '!cancelled()'
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-windows
+          if-no-files-found: error
+          retention-days: 2
+          path: |
+            zig-out/x86_64-windows/Floe.vst3
+            zig-out/x86_64-windows/Floe.clap
+            zig-out/x86_64-windows/tests.exe
+            zig-out/x86_64-windows/VST3-Validator.exe
+
+      - name: Upload logs
+        if: '!cancelled()'
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-linux
+          if-no-files-found: ignore
+          path: /home/runner/.local/state/Floe/floe.log
+
+      - if: '!cancelled()'
+        run: |
+          mkdir -p build_gen/generated_docs
+          zig-out/x86_64-linux/gen_docs_tool build_gen/generated_docs
+      - name: Upload generated docs
+        if: '!cancelled()'
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-docs
+          if-no-files-found: error
+          path: build_gen/generated_docs
+
+  windows-test:
+    runs-on: windows-latest
+    needs: linux-compile-and-test
+    if: '!cancelled()'
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            test_files
+            justfile
+
+      - uses: taiki-e/install-action@just
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: binaries-windows
+          path: zig-out/x86_64-windows
+
+      - run: just test-ci-windows
+
+      - name: Upload logs
+        if: '!cancelled()'
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-windows-${{ matrix.test }}
+          if-no-files-found: ignore
+          path: C:/Users/runner/AppData/Local/Floe/floe.log
+  
+  notify:
+    if: ${{ github.ref == 'refs/heads/main' && !cancelled() }}
+    runs-on: ubuntu-latest
+    needs: [linux-compile-and-test, windows-test, mac-compile-and-test]
+    steps:
+      - run: |
+          report="Floe CI"
+          report_job() {
+            job=$1
+            result=$2
+            if [ "$result" == "success" ]; then
+              report="$report | $job: ✅"
+            else
+              report="$report | $job: ❌"
+            fi
+          }
+          report_job "Windows" ${{ needs.windows-test.result }}
+          report_job "Mac" ${{ needs.mac-compile-and-test.result }}
+          report_job "Linux" ${{ needs.linux-compile-and-test.result }}
+
+          curl -d "$report" "ntfy.sh/${{ secrets.NTFY_CI_URL }}"
+          
+
+  generate-docs:
+    # !cancelled() ensures this is run even if the compile-and-test job failed, unless it was manually cancelled. 
+    # We want this because a test failure needn't stop us from updating the docs.
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !cancelled() }}
+    runs-on: ubuntu-latest
+    needs: linux-compile-and-test
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: generated-docs
+          path: docs
+
+      # https://github.com/rust-lang/mdBook/wiki/Automated-Deployment%3A-GitHub-Actions
+      - name: Install latest mdbook
+        run: |
+          tag=$(curl 'https://api.github.com/repos/rust-lang/mdbook/releases/latest' | jq -r '.tag_name')
+          url="https://github.com/rust-lang/mdbook/releases/download/${tag}/mdbook-${tag}-x86_64-unknown-linux-gnu.tar.gz"
+          mkdir mdbook
+          curl -sSL $url | tar -xz --directory=./mdbook
+          echo `pwd`/mdbook >> $GITHUB_PATH
+
+      - name: Deploy GitHub Pages
+        run: |
+          cd docs
+          wget https://raw.githubusercontent.com/Floe-Project/Floe-Logos/main/release/favicon.png -P theme
+          wget https://raw.githubusercontent.com/Floe-Project/Floe-Logos/main/release/favicon.svg -P theme
+          mdbook build
+          git worktree add gh-pages
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          cd gh-pages
+          # Delete the ref to avoid keeping history.
+          git update-ref -d refs/heads/gh-pages
+          rm -rf *
+          mv ../book/* .
+          git add .
+          git commit -m "Deploy $GITHUB_SHA to gh-pages"
+          git push --force --set-upstream origin gh-pages
+
